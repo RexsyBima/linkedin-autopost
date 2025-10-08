@@ -1,27 +1,34 @@
-Sample Markdown Data
-Project Overview
-This is a randomly generated markdown dataset used for testing.
-Goals
-1. Create a structured dataset.
-2. Demonstrate different Markdown features.
-3. Provide reusable example content.
-Team Members
-* Alice Johnson – Project Manager
-* Bob Smith – Developer
-* Charlie Lee – Designer
-Tasks
-* [x] Setup repository
-* [ ] Implement authentication
-* [ ] Create dashboard UI
-Table of Metrics
-| Metric         | Value | Status   |
-|----------------|-------|----------|
-| Uptime (%)     | 99.9  | ✅        |
-| Response Time  | 250ms | ⚡        |
-| Users          | 1,234 | 📈        |
-| Errors         | 3     | 🟢        |
-Code Example
-```python
-def greet(name):
-    return f"Hello, {name}!"
-print(greet("World"))
+I spoke at PyCon AU 2025 about one problem every beginner hits: tutorials teach building blocks, but real projects ask you to assemble the whole owl. Here’s the practical escape route I shared — short, actionable, and battle-tested.
+
+A bit about me: I don’t live in Python — I run process-control software (mostly Node), grow yogurt-like bacteria for cattle feed, write Mac/iOS apps in Swift, and I’ve written several books. That weird mix is why I care about teaching people to move from “tutorials” to actual, maintainable projects.
+
+The gap
+Tutorials show variables, loops and functions. Projects ask you to design, structure, document and maintain something that lasts. The jump feels huge. Break it down.
+
+1) Project design — think before you code
+Pick the project, platforms, language and frameworks first. Sketch the UI (even roughly). Break the project into chunks: server, database, APIs — then break those down (e.g., users, products, orders). Keep subdividing until each piece feels manageable. Step away: sleep on the plan and iterate — you’ll come back with a better design.
+
+2) Project structure — make it navigable
+Files and folders are your map. One responsibility per file or folder, so you can find, fix or extend behavior quickly (e.g., payments/stripe.py). Favor readability over cleverness. Rules I use:
+- Short functions (don’t make me scroll to read one).
+- Use a linter/formatter for consistent style.
+- Names matter: variables = nouns (username, total_cost), functions = verbs (process_order).
+- Keep a project notes file (markdown) listing what you’re working on, known bugs, and future plans — it’s the fastest way to get back in the groove.
+- Use git — it’s a time machine and off-site backup.
+
+3) Documentation — learn to read and to write it well
+Learn the style and navigation of the language/framework docs you rely on. If your editor can surface docs locally, enable it. For inline comments: don’t narrate the obvious; explain the why/how or leave TODOs/bookmarks. Save snippets of useful patterns so you don’t reinvent research later.
+
+4) Practical use of AI — accelerate, but verify
+How I use AI: Copilot as a super-completer, AI to explain unfamiliar code line-by-line, generate sample data for UI design, and edit across files (Cursor/AI-enabled editors). Example: I had a static site CSS task I couldn’t craft elegantly — AI got me there after iterative prompts and a few hours of refinements.
+Rules when using AI:
+- Provide context (files, functions, links).
+- Iterate — rerun, reword, give errors back to it to fix.
+- Use a fresh chat per new topic to avoid context confusion.
+- Ask the AI to explain its output; don’t accept blindly.
+- Don’t ask AI to write code you yourself couldn’t reasonably evaluate — it should fill gaps, not replace ownership.
+
+Final recap
+Design before you code. Structure for humans. Document to save time later. Use AI to speed up tasks — but check its work. Tutorials are valuable; the goal is to turn what you learn into projects you own.
+
+If you’re stuck between “tutorial” and “project,” tell me what you’re trying to build — I’ll try to suggest the next smallest chunk you can ship. I'll also be around at the conference with copies of Escape from Tutorial Hell (PyCon discount via the sticker table).
