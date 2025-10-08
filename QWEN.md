@@ -34,6 +34,21 @@ The project requires the following key dependencies (from pyproject.toml):
 The project requires the following environment variables (see `.env.example`):
 - `OPENAI_API` - OpenAI API key
 - `USER_SECRET` - LinkedIn user access token
+- CLIENT_SECRET - LinkedIn client app access token
+- CLIENT_ID - LinkedIn client app id
+
+## How to get LinkedIn's USER_SECRET, CLIENT_SECRET, CLIENT_ID
+Honestly, this tutorial will be the best -> [here](https://medium.com/data-science/linkedin-api-python-programmatically-publishing-d88a03f08ff1)
+1. Go to [developer-linkedin](https://developer.linkedin.com/) and login
+2. fill the form, the linkedin page can be your own page or Self-Employed page 
+3. Put the app-logo, you can use whatever image u want, as long as it SFW
+4. Now, once its created, the app will be at [here](https://www.linkedin.com/developers/apps)
+5. click the app, go to Products, then enable "Share on LinkedIn" and "Sign In with LinkedIn using OpenID Connect"
+6. Then go to auth, Application credentials, there should be Client ID and Primary Client Secret, copy them into .env with named CLIENT_ID and CLIENT_SECRET respectively
+7. Then, at the same page, there will be text like Using OAuth 2.0 tools you can create new access tokens and inspect token details such as token validity, scopes. click the link inside OAuth 2.0, there, just create token, then the scopes of openid, profile, w_member_social, email must be filled/checked on. Then generate the token
+8. Copy the token, and put it into USER_SECRET env
+9. ???
+10. Profit!!
 
 ## Building and Running
 
