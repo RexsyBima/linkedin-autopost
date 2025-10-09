@@ -396,6 +396,7 @@ if __name__ == "__main__":
             access_token=user_secret,
             profile_id=profile_id,
         )
+        os.rename(choice, choice + ".completed")
         print(response.content)
         print(response.json())
         print(response)

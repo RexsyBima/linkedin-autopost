@@ -39,6 +39,7 @@ The project requires the following environment variables (see `.env.example`):
 
 ## How to get LinkedIn's USER_SECRET, CLIENT_SECRET, CLIENT_ID
 Honestly, this tutorial will be the best -> [here](https://medium.com/data-science/linkedin-api-python-programmatically-publishing-d88a03f08ff1)
+OR...
 1. Go to [developer-linkedin](https://developer.linkedin.com/) and login
 2. fill the form, the linkedin page can be your own page or Self-Employed page 
 3. Put the app-logo, you can use whatever image u want, as long as it SFW
