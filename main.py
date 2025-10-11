@@ -1,7 +1,3 @@
-from pydantic_ai import Agent, WebSearchTool
-from pydantic_ai.providers.openai import OpenAIProvider
-from pydantic_ai.models.openai import OpenAIChatModel, OpenAIResponsesModel
-from pydantic_ai.providers.deepseek import DeepSeekProvider
 import os
 import re
 from pprint import pprint as print
@@ -10,6 +6,13 @@ from typing import Any
 import requests
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+from pydantic_ai import Agent, WebSearchTool
+
+# from pydantic_ai.models.openai import OpenAIChatModel
+from pydantic_ai.models.openai import OpenAIResponsesModel
+
+# from pydantic_ai.providers.deepseek import DeepSeekProvider
+from pydantic_ai.providers.openai import OpenAIProvider
 from youtube_transcript_api import FetchedTranscript, YouTubeTranscriptApi
 
 load_dotenv()
@@ -285,9 +288,7 @@ def post_personal_branding_with_image(
         media_asset=asset,
     )
 
-    print(response)
-    print(response.status_code)
-    print(response.json())
+    return response
 
 
 def html_to_text_with_lists(soup: BeautifulSoup):
@@ -332,7 +333,7 @@ def get_youtube_text(url: str) -> str:
     return transcript
 
 
-def get_ai_do_it(url: str):
+def get_ai_do_it(url: str, context: str):
     video_id = _get_youtube_id(url)
     assert video_id is not None, "Video ID incorrect"
     transcript = _get_youtube_full_text(ytt_api.fetch(video_id))
@@ -361,17 +362,55 @@ def list_txt_files() -> list[str]:
     return txt_files
 
 
+def get_html_txt(url: str):
+    response = requests.get(url).text
+    soup = BeautifulSoup(response, "html.parser")
+    body = soup.body
+    assert body is not None, "body tag is None, canceling"
+    result = body.get_text(strip=True)
+    return result
+
+
+def get_ai_do_it_html(text: str):
+    output = agent.run_sync(text)
+    filename = agent3.run_sync(text)
+    with open(filename.output + ".txt", "w") as f:
+        f.write(output.output)
+    if len(output.output) > 3000:
+        output = agent2.run_sync(output.output)
+        with open(filename.output + "-summarized.txt", "w") as f:
+            f.write(output.output)
+    if len(output.output) > 3000:
+        raise Exception(
+            f"Error, fail, the output of the llm has more than 3000 characters, its output is {output.output}"
+        )
+
+
 if __name__ == "__main__":
-    print("1. generate personal branding")
+    print("1. generate personal branding, based on youtube link")
     print(
-        "2. choose personal branding and post it to linkedin (i assume you will do the manual checking urself, fix text error, and adjust to your style urself)"
+        "2. generate personal branding, based on url html link, (this feauture is wip, especially for js heavy website)"
+    )
+    print(
+        "3. choose personal branding and post it to linkedin (i assume you will do the manual checking urself, fix text error, and adjust to your style urself)"
+    )
+    print(
+        "4. choose personal branding and post it to linkedin, with image post (i assume you will do the manual checking urself, fix text error, and adjust to your style urself)"
     )
     menu_choice = int(input("please put ur menu action here"))
     if menu_choice == 1:
         url = input("please put the url here: ")
-        get_ai_do_it(url)
+        context = input(
+            "please add more context if u want, leave it empty if u want none: "
+        )
+        get_ai_do_it(url, context)
         exit()
     elif menu_choice == 2:
+        url = input("please put the url here: ")
+        text = get_html_txt(url)
+        get_ai_do_it_html(text)
+        exit()
+    elif menu_choice == 3:
         txt = list_txt_files()
         for i, t in enumerate(txt):
             print(f"{i}. {t}")
@@ -389,13 +428,41 @@ if __name__ == "__main__":
             content = f.read()
         if len(content) > 3000:
             raise Exception(
-                f"Your content is too long, wont be able to publish it into linkedin, your length content is at {len(content)}"
+                f"Your content is too long, wont be able to publish it into linkedin, your length content is at {len(content)}, required content length (character) to be less than 3000"
             )
         response = post_content_no_image(
             content=content,
             access_token=user_secret,
             profile_id=profile_id,
         )
+        os.rename(choice, choice + ".completed")
+        print(response.content)
+        print(response.json())
+        print(response)
+    elif menu_choice == 4:
+        txt = list_txt_files()
+        for i, t in enumerate(txt):
+            print(f"{i}. {t}")
+        choice = int(input("please input which text you want to generate"))
+        choice = txt[choice]
+        print(f"are you sure this is ur choice : {choice}")
+        ... if input("press 1 to continue, else to exit") == "1" else exit(
+            "Canceling..."
+        )
+        user_secret = os.getenv("USER_SECRET")
+        assert user_secret is not None, ""
+        _, profile_id = _get_userinfo(user_secret)
+        with open(choice, "r") as f:
+            content = f.read()
+        if len(content) > 3000:
+            raise Exception(
+                f"Your content is too long, wont be able to publish it into linkedin, your length content is at {len(content)}, required content length (character) to be less than 3000"
+            )
+
+        img_choice = input(
+            "please input the image path in current working directory you want to use: "
+        )
+        response = post_personal_branding_with_image("./" + img_choice, content=content)
         os.rename(choice, choice + ".completed")
         print(response.content)
         print(response.json())
