@@ -15,6 +15,31 @@ from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from youtube_transcript_api import FetchedTranscript, YouTubeTranscriptApi
 
+url = os.getenv("URL_TARGET")
+password = os.getenv("PASSWORD")
+
+
+def post_to_webpage(password, title, description, body):
+    global url
+    assert url is not None, (
+        "Url is None, this one should be filled, this is personal use anyway, you wont know"
+    )
+    headers = {
+        "accept": "*/*",
+        "Content-Type": "application/json",
+    }
+    data = {
+        "password": password,
+        "title": title,
+        "description": description,
+        "body": body,
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    print(response.status_code)
+    print(response.text)  # or response.json() if response is JSON
+
+
 load_dotenv()
 ytt_api = YouTubeTranscriptApi()
 
@@ -152,6 +177,16 @@ agent3 = Agent(
     model, instructions="based on user article input, generate a title for it"
 )
 # result = agent.run_sync("hello world")
+
+agent4 = Agent(
+    model,
+    instructions="based on user article input, make the text to be html compatible, make sure only generate the html of the body only",
+)
+
+agent5 = Agent(
+    model,
+    instructions="based on user article input, generate a short description for it ",
+)
 
 
 def _get_youtube_id(url: str) -> str | None:
@@ -397,6 +432,7 @@ if __name__ == "__main__":
     print(
         "4. choose personal branding and post it to linkedin, with image post (i assume you will do the manual checking urself, fix text error, and adjust to your style urself)"
     )
+    print("5. post a txt file to my webpage (this is personal use only, you wont know)")
     menu_choice = int(input("please put ur menu action here"))
     if menu_choice == 1:
         url = input("please put the url here: ")
@@ -467,3 +503,19 @@ if __name__ == "__main__":
         print(response.content)
         print(response.json())
         print(response)
+    elif menu_choice == 5:
+        txt = list_txt_files()
+        for i, t in enumerate(txt):
+            print(f"{i}. {t}")
+        choice = int(input("please input which text you want to generate"))
+        choice = txt[choice]
+        print(f"are you sure this is ur choice : {choice}")
+        ... if input("press 1 to continue, else to exit") == "1" else exit(
+            "Canceling..."
+        )
+        with open(choice, "r") as f:
+            content = f.read()
+
+        result = agent4.run_sync().output
+        description_result = agent5.run_sync().output
+        post_to_webpage(password, choice, description_result, result)
