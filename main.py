@@ -15,12 +15,12 @@ from pydantic_ai.models.openai import OpenAIResponsesModel
 from pydantic_ai.providers.openai import OpenAIProvider
 from youtube_transcript_api import FetchedTranscript, YouTubeTranscriptApi
 
+load_dotenv()
 url = os.getenv("URL_TARGET")
 password = os.getenv("PASSWORD")
 
 
 def post_to_webpage(password, title, description, body):
-    global url
     assert url is not None, (
         "Url is None, this one should be filled, this is personal use anyway, you wont know"
     )
@@ -40,7 +40,6 @@ def post_to_webpage(password, title, description, body):
     print(response.text)  # or response.json() if response is JSON
 
 
-load_dotenv()
 ytt_api = YouTubeTranscriptApi()
 
 # model = OpenAIChatModel(
@@ -185,7 +184,7 @@ agent4 = Agent(
 
 agent5 = Agent(
     model,
-    instructions="based on user article input, generate a short description for it ",
+    instructions="based on user article input, generate a short description for it, make sure its less than 200 characters, which mean probably only two to three sentences only",
 )
 
 
@@ -392,6 +391,16 @@ def list_txt_files() -> list[str]:
     txt_files = []
     for filename in os.listdir(directory):
         if filename.endswith(".txt"):
+            txt_files.append(filename)
+    return txt_files
+
+
+def list_txt_files_full_path() -> list[str]:
+    """List all .txt files in a directory (non-recursive) and return their paths."""
+    directory = os.getcwd()
+    txt_files = []
+    for filename in os.listdir(directory):
+        if filename.endswith(".txt"):
             full_path = os.path.join(directory, filename)
             txt_files.append(os.path.abspath(full_path))
     return txt_files
@@ -447,8 +456,9 @@ if __name__ == "__main__":
         get_ai_do_it_html(text)
         exit()
     elif menu_choice == 3:
-        txt = list_txt_files()
-        for i, t in enumerate(txt):
+        txt = list_txt_files_full_path()
+        file_names = list_txt_files()
+        for i, t in enumerate(file_names):
             print(f"{i}. {t}")
         choice = int(input("please input which text you want to generate"))
         choice = txt[choice]
@@ -471,13 +481,15 @@ if __name__ == "__main__":
             access_token=user_secret,
             profile_id=profile_id,
         )
-        os.rename(choice, choice + ".completed")
+        if response.status_code == 201:
+            os.rename(choice, choice + ".completed")
         print(response.content)
         print(response.json())
         print(response)
     elif menu_choice == 4:
-        txt = list_txt_files()
-        for i, t in enumerate(txt):
+        txt = list_txt_files_full_path()
+        file_names = list_txt_files()
+        for i, t in enumerate(file_names):
             print(f"{i}. {t}")
         choice = int(input("please input which text you want to generate"))
         choice = txt[choice]
@@ -499,23 +511,26 @@ if __name__ == "__main__":
             "please input the image path in current working directory you want to use: "
         )
         response = post_personal_branding_with_image("./" + img_choice, content=content)
-        os.rename(choice, choice + ".completed")
+        if response.status_code == 201:
+            os.rename(choice, choice + ".completed")
         print(response.content)
         print(response.json())
         print(response)
     elif menu_choice == 5:
-        txt = list_txt_files()
+        txt = list_txt_files_full_path()
+        filename = list_txt_files()
         for i, t in enumerate(txt):
             print(f"{i}. {t}")
         choice = int(input("please input which text you want to generate"))
-        choice = txt[choice]
+        text_input = txt[choice]
+        text_file = filename[choice]
         print(f"are you sure this is ur choice : {choice}")
         ... if input("press 1 to continue, else to exit") == "1" else exit(
             "Canceling..."
         )
-        with open(choice, "r") as f:
+        with open(text_input, "r") as f:
             content = f.read()
 
-        result = agent4.run_sync().output
-        description_result = agent5.run_sync().output
-        post_to_webpage(password, choice, description_result, result)
+        result = agent4.run_sync(content).output
+        description_result = agent5.run_sync(content).output
+        post_to_webpage(password, text_file, description_result, result)
