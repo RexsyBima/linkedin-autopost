@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 import re
 from pprint import pprint as print
 from typing import Any
@@ -203,11 +204,11 @@ def _get_youtube_id(url: str) -> str | None:
     return match.group(1) if match else None
 
 
-def _get_youtube_full_text(transcript: FetchedTranscript) -> str:
+def _get_youtube_full_text(transcript: FetchedTranscript) -> tuple[str, float]:
     output = ""
     for t in transcript:
         output += t.text
-    return output
+    return output, transcript[-1].start
 
 
 def _get_userinfo(secret: str) -> tuple[dict[str, Any], str]:
@@ -363,14 +364,21 @@ def html_to_text_with_lists(soup: BeautifulSoup):
 def get_youtube_text(url: str) -> str:
     video_id = _get_youtube_id(url)
     assert video_id is not None, "Video ID incorrect"
-    transcript = _get_youtube_full_text(ytt_api.fetch(video_id))
+    transcript, timestamp = _get_youtube_full_text(ytt_api.fetch(video_id))
     return transcript
 
 
 def get_ai_do_it(url: str, context: str):
     video_id = _get_youtube_id(url)
     assert video_id is not None, "Video ID incorrect"
-    transcript = _get_youtube_full_text(ytt_api.fetch(video_id))
+    transcript, timestamp = _get_youtube_full_text(ytt_api.fetch(video_id))
+    if timestamp / 60 > 6:
+        ... if int(
+            input(
+                "It seems the video duration is longer than 6 minutes, are you sure you want to do this? press 1 to continue"
+            )
+        ) == 1 else exit()
+
     output = agent.run_sync(transcript)
     filename = agent3.run_sync(transcript)
     with open(filename.output + ".txt", "w") as f:
@@ -533,4 +541,6 @@ if __name__ == "__main__":
 
         result = agent4.run_sync(content).output
         description_result = agent5.run_sync(content).output
-        post_to_webpage(password, text_file, description_result, result)
+        post_to_webpage(
+            password, text_file.removesuffix(".txt"), description_result, result
+        )
